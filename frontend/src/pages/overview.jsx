@@ -3,6 +3,7 @@ import axios from "axios";
 import moment from "moment";
 import { useState, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 
 const Overview = () => {
@@ -11,8 +12,9 @@ const Overview = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const navigate = useNavigate();
 
-  const limit = 8;
+  const limit = 12;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +46,10 @@ const Overview = () => {
     }
   };
 
+  const handleCardClick = (id) => {
+    navigate(`/cardsets/${id}`);
+  };
+
   return (
     <div className="p-6 max-w-screen-xl mx-auto">
       <div className="relative mb-6">
@@ -65,6 +71,7 @@ const Overview = () => {
             <div
               key={index}
               className="bg-white p-6 shadow-lg rounded-xl border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+              onClick={() => handleCardClick(card.id)}
             >
               <h2 className="text-xl font-semibold text-gray-800 mb-3">
                 {card.title || "Card Title"}
