@@ -22,20 +22,16 @@ class CardSetController {
         .promise()
         .query(query, [userId, title, description, visibility]);
 
-      res
-        .status(201)
-        .json({
-          message: "CardSet created successfully.",
-          setId: results.insertId,
-        });
+      res.status(201).json({
+        message: "CardSet created successfully.",
+        setId: results.insertId,
+      });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error while creating the cardset.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error while creating the cardset.",
+        error: err.message,
+      });
     }
   }
 
@@ -61,12 +57,10 @@ class CardSetController {
       res.status(200).json({ message: "Cardset updated successfully." });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error while updating the cardset.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error while updating the cardset.",
+        error: err.message,
+      });
     }
   }
 
@@ -92,12 +86,10 @@ class CardSetController {
       res.status(200).json({ message: "Card set deleted successfully." });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error while deleting the card set.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error while deleting the card set.",
+        error: err.message,
+      });
     }
   }
 
@@ -120,12 +112,10 @@ class CardSetController {
       res.status(200).json({ cardset: cardSet[0] });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error fetching the card set.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error fetching the card set.",
+        error: err.message,
+      });
     }
   }
 
@@ -161,12 +151,72 @@ class CardSetController {
       });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error fetching the card sets.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error fetching the card sets.",
+        error: err.message,
+      });
+    }
+  }
+
+  async getAllCardSetsWithSearch(req, res) {
+    const { limit = 10, offset = 0, search = "" } = req.query;
+
+    try {
+      const query = `
+      SELECT 
+        c.id, 
+        c.title, 
+        c.description, 
+        c.visibility, 
+        c.created_at,
+        JSON_ARRAYAGG(JSON_OBJECT('id', t.id, 'name', t.name)) AS tags
+      FROM card_sets c
+      LEFT JOIN card_tags ct ON c.id = ct.set_id
+      LEFT JOIN tags t ON ct.tag_id = t.id
+      WHERE c.title LIKE ? OR c.description LIKE ? OR t.name LIKE ?
+      GROUP BY c.id
+      LIMIT ? OFFSET ?;
+    `;
+
+      const countQuery = `
+      SELECT COUNT(DISTINCT c.id) AS totalCount
+      FROM card_sets c
+      LEFT JOIN card_tags ct ON c.id = ct.set_id
+      LEFT JOIN tags t ON ct.tag_id = t.id
+      WHERE c.title LIKE ? OR c.description LIKE ? OR t.name LIKE ?;
+    `;
+
+      const searchQuery = `%${search}%`;
+
+      const [cardSets] = await this.connection
+        .promise()
+        .query(query, [
+          searchQuery,
+          searchQuery,
+          searchQuery,
+          parseInt(limit),
+          parseInt(offset),
+        ]);
+      const [totalCountResult] = await this.connection
+        .promise()
+        .query(countQuery, [searchQuery, searchQuery, searchQuery]);
+
+      const totalCount = totalCountResult[0].totalCount;
+
+      res.status(200).json({
+        cardSets,
+        metadata: {
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          count: totalCount,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "There was an error fetching the card sets.",
+        error: err.message,
+      });
     }
   }
 
@@ -226,12 +276,10 @@ class CardSetController {
       res.status(200).json(cardSet);
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error fetching the card set.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error fetching the card set.",
+        error: err.message,
+      });
     }
   }
 
@@ -262,12 +310,10 @@ class CardSetController {
       res.status(201).json({ message: "Tag added to card set successfully." });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error adding the tag to the card set.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error adding the tag to the card set.",
+        error: err.message,
+      });
     }
   }
 
@@ -296,12 +342,10 @@ class CardSetController {
         .json({ message: "Tag removed from card set successfully." });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          message: "There was an error removing the tag from the card set.",
-          error: err.message,
-        });
+      res.status(500).json({
+        message: "There was an error removing the tag from the card set.",
+        error: err.message,
+      });
     }
   }
 }

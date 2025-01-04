@@ -39,6 +39,7 @@ router.delete(
   (req, res, next) => AuthController.authenticateToken(req, res, next),
   (req, res) => cardSetController.deleteCardSet(req, res)
 );
+router.get("/", (req, res) => cardSetController.getAllCardSetsWithSearch(req, res));
 router.get("/all", (req, res) => cardSetController.getAllCardSets(req, res));
 router.get("/:id", (req, res) => cardSetController.getCardSetById(req, res));
 router.get("/cards/:id", (req, res) =>
