@@ -21,8 +21,6 @@ app.use("/api/cardsets", cardsetRoutes);
 app.use("/api/cards", cardRoutes);
 app.use("/api/authenticate", authRoutes);
 
-
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server runs on http://localhost:${PORT}`);
