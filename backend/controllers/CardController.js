@@ -17,7 +17,7 @@ class CardController{
             const query = 'INSERT INTO cards (card_set_id, question, answer) VALUES (?, ?, ?)';
             const [results] = await this.connection.promise().query(query, [id, question, answer]);
 
-            res.status(201).json({ message: 'Card created successfully.', cardId: results.insertId });
+            res.status(201).json({ message: 'Card created successfully.', cardId: results.insertId, card: {question: question, answer: answer} });
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'There was an error while creating the card.', error: err.message });

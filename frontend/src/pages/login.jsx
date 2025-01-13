@@ -1,18 +1,48 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useContext, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { AuthContext } from "../components/authProvider";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useSnackbar } from "notistack";
 import { FiLoader } from "react-icons/fi";
 
 const Login = () => {
+  const { setAccessToken } = useContext(AuthContext);
+  const { setRefreshToken } = useContext(AuthContext);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    const checkRefreshToken = async () => {
+      const refreshToken = Cookies.get("refreshToken");
+      if (refreshToken) {
+        try {
+          setLoading(true);
+          const response = await axios.post("/api/authenticate/refresh-token", { refreshToken });
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+          Cookies.set("accessToken", accessToken, { expires: 1 / 24 / 4});
+          setAccessToken(accessToken);
+          Cookies.set("refreshToken", refreshToken, { expires: 7 });
+          setRefreshToken(refreshToken);
+
+          enqueueSnackbar("Automatically logged in", { variant: "success" });
+          navigate("/overview");
+        } catch (error) {
+          console.error("Error refreshing token:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    checkRefreshToken();
+  }, [setAccessToken, navigate, enqueueSnackbar]);
   const handleChange = (event) => {
     const { name, value } = event.target;
     setLoginForm((prevData) => ({
@@ -50,13 +80,12 @@ const Login = () => {
           sameSite: "Strict",
           expires: 7,
         });
-
-        enqueueSnackbar("Successful login", { variant: "success" });
+        setAccessToken(accessToken);
+        enqueueSnackbar("Succesfull login", { variant: "success" });
         navigate("/overview");
       }
-    } catch (err) {
-        console.log(err);
-      if (err.response && err.response.status === 401) {
+    } catch (e) {
+      if (e.response && e.response.status === 401) {
         enqueueSnackbar("Wrong credentials", { variant: "error" });
       } else {
         enqueueSnackbar("Error login", { variant: "error" });
@@ -75,7 +104,7 @@ const Login = () => {
         <div className="md:flex-1 bg-gradient-to-br from-navy-500 to-navy-800">
           <header className="flex flex-col justify-center h-full p-10 text-center md:text-left">
             <h1 className="text-4xl text-white font-extralight">Welcome,</h1>
-            <h2 className="text-3xl text-white font-bold">FlipFlow user</h2>
+            <h2 className="text-3xl text-white font-bold">SafeCircle admin</h2>
           </header>
         </div>
         <div className="md:flex-1 bg-white p-10 flex flex-col justify-center">
@@ -98,8 +127,8 @@ const Login = () => {
               required
               className="h-12 pl-4 rounded-2xl bg-gray-100 focus:ring-2 focus:ring-blue-400 outline-none"
             />
-            <label htmlFor="password" className=" text-navy-600 font-medium">
-              Password
+            <label htmlFor="wachtwoord" className=" text-navy-600 font-medium">
+              Wachtwoord
             </label>
             <div className="relative rounded-2xl bg-gray-100 h-12">
               <input

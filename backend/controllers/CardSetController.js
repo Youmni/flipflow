@@ -64,6 +64,32 @@ class CardSetController {
     }
   }
 
+  async patchVisability(req, res) {
+    const id = req.params.id;
+    const { visibility } = req.body;
+
+    try {
+      const [existingCardset] = await this.connection
+        .promise()
+        .query("SELECT * FROM card_sets WHERE id = ?", [id]);
+
+      if (existingCardset.length === 0) {
+        return res.status(404).json({ message: "Cardset not found." });
+      }
+
+      const query = "UPDATE card_sets SET visibility = ? WHERE id = ?";
+      await this.connection.promise().query(query, [visibility, id]);
+
+      res.status(200).json({ message: "Cardset updated successfully." });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "There was an error while updating the cardset.",
+        error: err.message,
+      });
+    }
+  }
+
   async deleteCardSet(req, res) {
     const { card_set_id } = req.params;
 
@@ -93,27 +119,62 @@ class CardSetController {
     }
   }
 
-  async getCardSetById(req, res) {
-    const { id } = req.params;
+  async getCardSetByUserId(req, res) {
+    const { limit = 10, offset = 0, search = "" } = req.query;
+    const { userId } = req.params;
 
     try {
-      console.log(id);
-      const [existingCardSet] = await this.connection
-        .promise()
-        .query("SELECT * FROM card_sets WHERE id = ?", [id]);
+      const query = `
+      SELECT 
+        c.id, 
+        c.title, 
+        c.description, 
+        c.visibility, 
+        c.created_at,
+        c.user_id
+      FROM card_sets c
+      WHERE (c.title LIKE ? OR c.description LIKE ?)
+      AND c.user_id = ?
+      GROUP BY c.id
+      LIMIT ? OFFSET ?;
+    `;
 
-      if (existingCardSet.length === 0) {
-        return res.status(404).json({ message: "Card set not found." });
-      }
+      const countQuery = `
+      SELECT COUNT(DISTINCT c.id) AS totalCount
+      FROM card_sets c
+      WHERE (c.title LIKE ? OR c.description LIKE ?)
+      AND c.user_id = ?;
+    `;
 
-      const [cardSet] = await this.connection
+      const searchQuery = `%${search}%`;
+      console.log(userId);
+      const [cardSets] = await this.connection
         .promise()
-        .query("SELECT * FROM card_sets WHERE card_sets.id = ?", [id]);
-      res.status(200).json({ cardset: cardSet[0] });
+        .query(query, [
+          searchQuery,
+          searchQuery,
+          userId,
+          parseInt(limit),
+          parseInt(offset),
+        ]);
+      const [totalCountResult] = await this.connection
+        .promise()
+        .query(countQuery, [searchQuery, searchQuery, userId]);
+
+      const totalCount = totalCountResult[0].totalCount;
+
+      res.status(200).json({
+        cardSets,
+        metadata: {
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          count: totalCount,
+        },
+      });
     } catch (err) {
       console.error(err);
       res.status(500).json({
-        message: "There was an error fetching the card set.",
+        message: "There was an error fetching the card sets.",
         error: err.message,
       });
     }
@@ -129,11 +190,8 @@ class CardSetController {
                 c.title, 
                 c.description, 
                 c.visibility, 
-                c.created_at,
-                JSON_ARRAYAGG(JSON_OBJECT('id', t.id, 'name', t.name)) AS tags
+                c.created_at
             FROM card_sets c
-            LEFT JOIN card_tags ct ON c.id = ct.set_id
-            LEFT JOIN tags t ON ct.tag_id = t.id
             GROUP BY c.id
             LIMIT ? OFFSET ?;
         `;
@@ -163,27 +221,21 @@ class CardSetController {
 
     try {
       const query = `
-      SELECT 
+        SELECT 
         c.id, 
         c.title, 
         c.description, 
         c.visibility, 
-        c.created_at,
-        JSON_ARRAYAGG(JSON_OBJECT('id', t.id, 'name', t.name)) AS tags
-      FROM card_sets c
-      LEFT JOIN card_tags ct ON c.id = ct.set_id
-      LEFT JOIN tags t ON ct.tag_id = t.id
-      WHERE c.title LIKE ? OR c.description LIKE ? OR t.name LIKE ?
-      GROUP BY c.id
-      LIMIT ? OFFSET ?;
+        c.created_at
+        FROM card_sets c
+        WHERE (c.title LIKE ? OR c.description LIKE ?) AND c.visibility = 'public'
+        LIMIT ? OFFSET ?;
     `;
 
       const countQuery = `
       SELECT COUNT(DISTINCT c.id) AS totalCount
       FROM card_sets c
-      LEFT JOIN card_tags ct ON c.id = ct.set_id
-      LEFT JOIN tags t ON ct.tag_id = t.id
-      WHERE c.title LIKE ? OR c.description LIKE ? OR t.name LIKE ?;
+      WHERE (c.title LIKE ? OR c.description LIKE ?) AND c.visibility = 'public'
     `;
 
       const searchQuery = `%${search}%`;
@@ -191,7 +243,6 @@ class CardSetController {
       const [cardSets] = await this.connection
         .promise()
         .query(query, [
-          searchQuery,
           searchQuery,
           searchQuery,
           parseInt(limit),
@@ -245,10 +296,6 @@ class CardSetController {
       FROM card_sets
       LEFT JOIN cards 
           ON card_sets.id = cards.card_set_id
-      LEFT JOIN card_tags 
-          ON card_sets.id = card_tags.set_id
-      LEFT JOIN tags 
-          ON card_tags.tag_id = tags.id
       WHERE card_sets.id = ?
   `;
 
@@ -278,72 +325,6 @@ class CardSetController {
       console.error(err);
       res.status(500).json({
         message: "There was an error fetching the card set.",
-        error: err.message,
-      });
-    }
-  }
-
-  async addTagToCardSet(req, res) {
-    const { card_set_id, tag_id } = req.body;
-
-    try {
-      console.log(card_set_id, tag_id);
-      const [existingCardSet] = await this.connection
-        .promise()
-        .query("SELECT * FROM card_sets WHERE id = ?", [card_set_id]);
-
-      if (existingCardSet.length === 0) {
-        return res.status(404).json({ message: "Card set not found." });
-      }
-
-      const [existingTag] = await this.connection
-        .promise()
-        .query("SELECT * FROM tags WHERE id = ?", [tag_id]);
-
-      if (existingTag.length === 0) {
-        return res.status(404).json({ message: "Tag not found." });
-      }
-
-      const query = "INSERT INTO card_tags (set_id, tag_id) VALUES (?, ?)";
-      await this.connection.promise().query(query, [card_set_id, tag_id]);
-
-      res.status(201).json({ message: "Tag added to card set successfully." });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({
-        message: "There was an error adding the tag to the card set.",
-        error: err.message,
-      });
-    }
-  }
-
-  async removeTagFromCardSet(req, res) {
-    const { card_set_id, tag_id } = req.body;
-
-    try {
-      const [existingRelation] = await this.connection
-        .promise()
-        .query("SELECT * FROM card_tags WHERE set_id = ? AND tag_id = ?", [
-          card_set_id,
-          tag_id,
-        ]);
-
-      if (existingRelation.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "Tag not associated with the card set." });
-      }
-
-      const query = "DELETE FROM card_tags WHERE set_id = ? AND tag_id = ?";
-      await this.connection.promise().query(query, [card_set_id, tag_id]);
-
-      res
-        .status(200)
-        .json({ message: "Tag removed from card set successfully." });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({
-        message: "There was an error removing the tag from the card set.",
         error: err.message,
       });
     }

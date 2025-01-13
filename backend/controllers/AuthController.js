@@ -8,11 +8,11 @@ class AuthController{
     }
 
     generateAccessToken(userId){
-        return jwt.sign({userId}, process.env.ACCESS_TOKEN_SECRET, { expiresIn:process.env.ACCESS_TOKEN_EXPIRY });
+        return jwt.sign({userId, type: "access"}, process.env.ACCESS_TOKEN_SECRET, { expiresIn:process.env.ACCESS_TOKEN_EXPIRY });
     };
 
     generateRefreshToken(userId){
-        return jwt.sign({userId}, process.env.REFRESH_TOKEN_SECRET, { expiresIn:process.env.REFRESH_TOKEN_EXPIRY });
+        return jwt.sign({userId, type: "refresh"}, process.env.REFRESH_TOKEN_SECRET, { expiresIn:process.env.REFRESH_TOKEN_EXPIRY });
     };
 
     static authenticateToken(req, res, next) {
@@ -21,11 +21,19 @@ class AuthController{
         if (!token) return res.sendStatus(401); 
     
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-            if (err) return res.sendStatus(403);
+            if(err){
+                return res.status(403).json({ error: "Invalid token" });
+            }
+            console.log(decoded)
+            if (decoded.type !== "access") {
+                return res.status(403).json({ error: "Invalid token" });
+            }
+    
             req.userId = decoded.userId;
             next();
         });
     }
+    
 
     static getNewAccessToken(req, res) {
         const {refreshToken } = req.body;
@@ -39,9 +47,10 @@ class AuthController{
                 return res.status(403).json({ message: 'Invalid refresh token' });
             }
 
-            const newAccessToken = jwt.sign({userId: decoded.userId}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
-            
-            return res.json({ accessToken: newAccessToken });
+            const newAccessToken = jwt.sign({userId: decoded.userId, type: "access"}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
+            const newRefreshToken = jwt.sign({userId: decoded.userId, type: "refresh"}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
+
+            return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken});
         });
     }
 

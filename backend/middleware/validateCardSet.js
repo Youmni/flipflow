@@ -31,8 +31,10 @@ const validateCardSet = (req, res, next) => {
   const { error } = schema.validate(req.body, { abortEarly: false });
 
   if (error) {
+    console.log("hier")
     const errorMessages = error.details.map((detail) => detail.message);
-    return res.status(400).json({ message: errorMessages });
+    console.log(errorMessages)
+    return res.status(500).json({ message: errorMessages });
   }
 
   next();

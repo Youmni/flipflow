@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
-import tagRoutes from './routes/tagRoutes.js';
 import cardsetRoutes from './routes/cardsetRoutes.js';
 import cardRoutes from './routes/cardRoutes.js';
 import authRoutes from './routes/authRoute.js';
@@ -16,7 +15,6 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use("/api/users", userRoutes);
-app.use("/api/tags", tagRoutes);
 app.use("/api/cardsets", cardsetRoutes);
 app.use("/api/cards", cardRoutes);
 app.use("/api/authenticate", authRoutes);

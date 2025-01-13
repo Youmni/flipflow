@@ -24,24 +24,23 @@ router.post(
   validateCardSet,
   (req, res) => cardSetController.createCardSet(req, res)
 );
-router.post(
-  "/tag/add",
-  (req, res, next) => AuthController.authenticateToken(req, res, next),
-  (req, res) => cardSetController.addTagToCardSet(req, res)
-);
-router.delete(
-  "/tag/remove",
-  (req, res, next) => AuthController.authenticateToken(req, res, next),
-  (req, res) => cardSetController.removeTagFromCardSet(req, res)
-);
 router.delete(
   "/delete/:id",
   (req, res, next) => AuthController.authenticateToken(req, res, next),
   (req, res) => cardSetController.deleteCardSet(req, res)
 );
-router.get("/", (req, res) => cardSetController.getAllCardSetsWithSearch(req, res));
+router.patch(
+  "/:id",
+  (req, res, next) => AuthController.authenticateToken(req, res, next),
+  (req, res) => cardSetController.patchVisability(req, res)
+);
+router.get("/", (req, res) =>
+  cardSetController.getAllCardSetsWithSearch(req, res)
+);
 router.get("/all", (req, res) => cardSetController.getAllCardSets(req, res));
-router.get("/:id", (req, res) => cardSetController.getCardSetById(req, res));
+router.get("/:userId", (req, res) =>
+  cardSetController.getCardSetByUserId(req, res)
+);
 router.get("/cards/:id", (req, res) =>
   cardSetController.getCardSetWithCardsById(req, res)
 );

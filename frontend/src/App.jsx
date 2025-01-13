@@ -7,6 +7,9 @@ import CardSetDetails from "./pages/cardSetDetails"
 import Login from "./pages/login"; 
 import Register from "./pages/register";
 import Header from "./components/header";
+import AddCardset from "./components/addCardset";
+import AddCards from "./components/addCards";
+
 import "./App.css";
 
 function App() {
@@ -26,7 +29,9 @@ function App() {
               <Route path="/cards" element={<Cards />} />
               <Route path="/cardsets/:setId" element={<CardSetDetails />} />
               <Route path="/login" element={<Login />} /> 
-              <Route path="/register" element={<Register />} /> 
+              <Route path="/register" element={<Register />} />
+              <Route path="/cardset/add" element={<AddCardset />} /> 
+              <Route path="/cardset/:id/add" element={<AddCards />} />
             </Routes>
           </div>
         </div>
