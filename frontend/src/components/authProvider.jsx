@@ -1,7 +1,6 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import React, { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
 
@@ -9,16 +8,22 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(Cookies.get('accessToken') || null);
   const [refreshToken, setRefreshToken] = useState(Cookies.get('refreshToken') || null);
   const navigate = useNavigate();
-  
 
   useEffect(() => {
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        if (error.response && error.response.status === 401 && refreshToken) {
+    const handleResponse = async (response, originalRequest) => {
+      if (response.status === 403 || response.status === 401) {
+        if (refreshToken) {
           try {
             const newTokens = await refreshAccessToken();
             setAccessToken(newTokens.accessToken);
+            const retryResponse = await fetch(originalRequest.url, {
+              ...originalRequest,
+              headers: {
+                ...originalRequest.headers,
+                'Authorization': `Bearer ${newTokens.accessToken}`,
+              },
+            });
+            return retryResponse;
           } catch (refreshError) {
             console.error('Error refreshing token:', refreshError);
             setAccessToken(null);
@@ -29,43 +34,49 @@ export const AuthProvider = ({ children }) => {
           }
         }
       }
-    );
-  }, [accessToken, refreshToken]);
+      return response;
+    };
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const originalRequest = args[1] || {};
+      const response = await originalFetch(...args);
+      return handleResponse(response, { ...originalRequest, url: args[0] });
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [refreshToken, navigate]);
 
   const refreshAccessToken = async () => {
     try {
-      const response = await axios.post('/api/user/refresh-token', {
-        refreshToken,
+      const response = await fetch('/api/authenticate/refresh-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
       });
-      console.log('Access token refreshed:', response.data);
+      const data = await response.json();
+      console.log('Access token refreshed:', data);
 
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
-      Cookies.set('accessToken', newAccessToken, { expires: 1 / 24 / 4 }); 
-      Cookies.set('refreshToken', newRefreshToken, { expires: 7 }); 
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = data;
+      console.log('New access token:', newAccessToken);
+      console.log('New refresh token:', newRefreshToken);
 
-      setAccessToken(newAccessToken);
-      setRefreshToken(newRefreshToken);
+      Cookies.set('accessToken', newAccessToken);
+      Cookies.set('refreshToken', newRefreshToken);
 
       return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
       console.error('Error refreshing access token:', error);
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
-      navigate('/login');
       throw error;
     }
   };
 
-  const handleLogout = () => {
-    setAccessToken(null);
-    setRefreshToken(null);
-    Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');
-    navigate('/login');
-  };
-
   return (
-    <AuthContext.Provider value={{ accessToken, setAccessToken, refreshToken, setRefreshToken, handleLogout }}>
+    <AuthContext.Provider value={{ accessToken, setAccessToken, refreshToken, setRefreshToken }}>
       {children}
     </AuthContext.Provider>
   );

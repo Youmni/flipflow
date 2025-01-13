@@ -57,8 +57,8 @@ const Header = () => {
       <nav className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">FlipFlow</h1>
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/overview" className="py-2">Home</Link>
-          <Link to="/cards" className="py-2">Create</Link>
+          <Link to="/overview" className="px-5 py-2 hover:font-semibold rounded hover:bg-white hover:text-black transition duration-300">Home</Link>
+          <Link to={accessToken!==null ? "/cards" : "/login"} className="px-5 py-2 hover:font-semibold rounded hover:bg-white hover:text-black transition duration-300">Create</Link>
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative">
@@ -89,9 +89,9 @@ const Header = () => {
         </div>
       </nav>
       {isMenuOpen && (
-        <div className="mt-4 md:hidden">
-          <Link to="/overview" className="py-2">Home</Link>
-          <Link to="/cards" className="py-2">Create</Link>
+        <div className="mt-4 md:hidden flex flex-col space-y-2">
+          <Link to="/overview" className="py-2 hover:font-semibold hover:bg-white hover:text-black transition duration-300">Home</Link>
+          <Link to={accessToken!==null ? "/cards" : "/login"} className="py-2 hover:font-semibold hover:bg-white hover:text-black transition duration-300">Create</Link>
         </div>
       )}
     </div>
