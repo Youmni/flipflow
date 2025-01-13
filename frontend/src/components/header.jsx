@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import axios from "axios";
@@ -12,6 +12,7 @@ const Header = () => {
 
   const { accessToken } = useContext(AuthContext);
   const navigate = useNavigate();
+  const suggestionsRef = useRef(null);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -32,51 +33,49 @@ const Header = () => {
     fetchSuggestions();
   }, [search]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+        setSuggestions([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearch(suggestion.title);
+    setSuggestions([]);
+    navigate(`/cardsets/${suggestion.id}`);
+  };
+
   return (
     <div className="bg-gray-800 text-white p-4">
       <nav className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">FlipFlow</h1>
+        <div className="hidden md:flex items-center space-x-4">
+          <Link to="/overview" className="py-2">Home</Link>
+          <Link to="/cards" className="py-2">Create</Link>
+        </div>
         <div className="flex items-center space-x-4">
-          <div className="hidden md:flex space-x-4">
-            <Link
-              to="/overview"
-              className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-            >
-              Overview
-            </Link>
-
-            {accessToken ? (
-              <Link
-                to="/cards"
-                className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-              >
-                MyCards
-              </Link>
-            ) : (
-              <Link
-                to="/login"
-                className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-              >
-                Inloggen
-              </Link>
-            )}
-          </div>
-
           <div className="relative">
             <input
-              type="search"
-              className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring focus:ring-blue-500"
-              placeholder="Search..."
+              type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="px-4 py-2 rounded-md text-black"
+              placeholder="Search..."
             />
             {suggestions.length > 0 && (
-              <ul className="absolute bg-gray-700 text-white mt-1 rounded-lg shadow-lg w-full z-10">
+              <ul ref={suggestionsRef} className="absolute bg-white text-black w-full mt-2 rounded-md shadow-lg z-10">
                 {suggestions.map((suggestion) => (
                   <li
-                    onClick={() => navigate(`/cardsets/${suggestion.id}`)}
                     key={suggestion.id}
-                    className="p-2 hover:bg-gray-600 cursor-pointer"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="px-4 py-2 cursor-pointer hover:bg-gray-200"
                   >
                     {suggestion.title}
                   </li>
@@ -84,48 +83,15 @@ const Header = () => {
               </ul>
             )}
           </div>
-          <button
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <FiX className="text-white" size={24} />
-            ) : (
-              <FiMenu className="text-white" size={24} />
-            )}
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-2xl md:hidden">
+            {isMenuOpen ? <FiX /> : <FiMenu />}
           </button>
         </div>
       </nav>
       {isMenuOpen && (
-        <div className="md:hidden bg-gray-800 text-white flex flex-col items-center space-y-4 mt-4">
-          <Link
-            to="/overview"
-            className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-          >
-            Overview
-          </Link>
-          <Link
-            to="/quiz"
-            className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-          >
-            Play
-          </Link>
-
-          {accessToken ? (
-            <Link
-              to="/cards"
-              className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-            >
-              MyCards
-            </Link>
-          ) : (
-            <Link
-              to="/login"
-              className="text-gray-200 hover:text-blue-500 py-2 px-4 rounded-lg transition-colors"
-            >
-              Inloggen
-            </Link>
-          )}
+        <div className="mt-4 md:hidden">
+          <Link to="/overview" className="py-2">Home</Link>
+          <Link to="/cards" className="py-2">Create</Link>
         </div>
       )}
     </div>
