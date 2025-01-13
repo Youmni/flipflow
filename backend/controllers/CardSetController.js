@@ -36,23 +36,15 @@ class CardSetController {
   }
 
   async updateCardSet(req, res) {
-    const userId = req.params.id;
+    const id = req.params.id;
     const { title, description, visibility } = req.body;
 
     try {
-      const [existingUser] = await this.connection
-        .promise()
-        .query("SELECT * FROM users WHERE id = ?", [userId]);
-
-      if (existingUser.length === 0) {
-        return res.status(404).json({ message: "User not found." });
-      }
-
       const query =
         "UPDATE card_sets SET title = ?, description = ?, visibility = ? WHERE id = ?";
       await this.connection
         .promise()
-        .query(query, [title, description, visibility, userId]);
+        .query(query, [title, description, visibility, id]);
 
       res.status(200).json({ message: "Cardset updated successfully." });
     } catch (err) {

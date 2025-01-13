@@ -26,17 +26,14 @@ const AddCardset = () => {
     }
   }, [accessToken]);
 
-  // Handle input changes and update state
   const handleCardsetChange = (e) => {
     const { name, value } = e.target;
     setCardset({ ...cardset, [name]: value });
   };
 
-  // Validate form fields
   const validateForm = () => {
     const newErrors = [];
 
-    // Title validation
     if (cardset.title.length < 4) {
       newErrors.push("Title must be at least 4 characters long.");
     }
@@ -44,7 +41,6 @@ const AddCardset = () => {
       newErrors.push("Title must be less than 255 characters long.");
     }
 
-    // Description validation
     if (cardset.description.length < 15) {
       newErrors.push("Description must be at least 15 characters long.");
     }
@@ -52,12 +48,10 @@ const AddCardset = () => {
       newErrors.push("Description must be less than 255 characters long.");
     }
 
-    // If there are errors, return false, else return true
     setErrors(newErrors);
     return newErrors.length === 0;
   };
 
-  // Handle form submission
   const handleCreateCardset = async () => {
     console.log("Creating cardset:", cardset);
     console.log("User ID:", userId);

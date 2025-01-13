@@ -24,6 +24,11 @@ router.post(
   validateCardSet,
   (req, res) => cardSetController.createCardSet(req, res)
 );
+router.put(
+  "/update/:id",
+  (req, res, next) => AuthController.authenticateToken(req, res, next),
+  (req, res) => cardSetController.updateCardSet(req, res)
+);
 router.delete(
   "/delete/:id",
   (req, res, next) => AuthController.authenticateToken(req, res, next),
