@@ -1,22 +1,152 @@
-import React from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../components/authProvider";
 
-const CardList = ({ cards }) => {
+const CardList = ({ cardset, onCardUpdate }) => {
+  const [isEditing, setIsEditing] = useState(null);
+  const [updatedCard, setUpdatedCard] = useState({ question: "", answer: "" });
+  const [errors, setErrors] = useState([]);
+  const { accessToken } = useContext(AuthContext);
+
+  const handleEditClick = (card) => {
+    setIsEditing(card.card_id);
+    setUpdatedCard({ question: card.question, answer: card.answer });
+    setErrors([]);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedCard((prevCard) => ({
+      ...prevCard,
+      [name]: value,
+    }));
+  };
+
+  const validateCard = () => {
+    const newErrors = [];
+    if (updatedCard.question.length < 4) {
+      newErrors.push("Question must be at least 4 characters long.");
+    }
+    if (updatedCard.question.length > 255) {
+      newErrors.push("Question cannot be longer than 255 characters.");
+    }
+    if (updatedCard.answer.length < 2) {
+      newErrors.push("Answer must be at least 2 characters long.");
+    }
+    if (updatedCard.answer.length > 255) {
+      newErrors.push("Answer cannot be longer than 255 characters.");
+    }
+    setErrors(newErrors);
+    return newErrors.length === 0;
+  };
+
+  const handleUpdateCard = async (cardId) => {
+    if (!validateCard()) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/cards/update/${cardset.card_set_id}/${cardId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(updatedCard),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response data:", errorData);
+        throw new Error(`Failed to update card: ${response.statusText}`);
+      }
+
+      setIsEditing(null);
+      setUpdatedCard({ question: "", answer: "" });
+
+      onCardUpdate({ ...updatedCard, card_id: cardId });
+
+    } catch (error) {
+      console.error("Error updating the card:", error);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-100 border border-gray-300 rounded-md shadow-sm">
       <h3 className="text-lg font-semibold text-navy-700 mb-4">Added Cards</h3>
-      {cards.length > 0 ? (
+      {cardset.cards.length > 0 ? (
         <ul className="divide-y divide-gray-200">
-          {cards.map((card, index) => (
+          {cardset.cards.map((card) => (
             <li
-              key={index}
+              key={card.card_id}
               className="py-4 px-4 mb-2 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition"
             >
-              <p className="text-sm text-gray-700">
-                <span className="font-bold">Question:</span> {card.question}
-              </p>
-              <p className="text-sm text-gray-600 mt-2">
-                <span className="font-bold">Answer:</span> {card.answer}
-              </p>
+              {isEditing === card.card_id ? (
+                <div>
+                  <div>
+                    <label htmlFor={`question-${card.card_id}`} className="block text-sm font-medium text-gray-700">
+                      Question
+                    </label>
+                    <input
+                      type="text"
+                      id={`question-${card.card_id}`}
+                      name="question"
+                      value={updatedCard.question}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-navy-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`answer-${card.card_id}`} className="block text-sm font-medium text-gray-700">
+                      Answer
+                    </label>
+                    <textarea
+                      id={`answer-${card.card_id}`}
+                      name="answer"
+                      value={updatedCard.answer}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-navy-500 focus:outline-none"
+                    />
+                  </div>
+                  {errors.length > 0 && (
+                    <div className="mt-2 p-3 bg-red-100 border border-red-300 rounded-md">
+                      <ul className="text-red-700">
+                        {errors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="mt-4 flex justify-between">
+                    <button
+                      onClick={() => setIsEditing(null)}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleUpdateCard(card.card_id)}
+                      className="px-4 py-2 bg-navy-600 text-white rounded-md hover:bg-navy-700 focus:ring-2 focus:ring-navy-500"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-bold">Question:</span> {card.question}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    <span className="font-bold">Answer:</span> {card.answer}
+                  </p>
+                  <button
+                    onClick={() => handleEditClick(card)}
+                    className="mt-2 text-sm text-blue-500 hover:text-blue-700"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

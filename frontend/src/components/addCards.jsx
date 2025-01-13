@@ -9,15 +9,15 @@ const AddCards = () => {
   const { id } = useParams();
   const { accessToken } = useContext(AuthContext);
   const [cardset, setCardset] = useState(null);
-  const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState([]);
-  const [cardsetErrors, setCardsetErrors] = useState([]); 
+  const [cardsetErrors, setCardsetErrors] = useState([]);
   const [newCard, setNewCard] = useState({ question: "", answer: "" });
   const [updatedTitle, setUpdatedTitle] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
+  const [updatedVisibility, setUpdatedVisibility] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  updatedVisibility;
   const fetchCardset = async () => {
     try {
       setLoading(true);
@@ -25,10 +25,11 @@ const AddCards = () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await response.json();
+      console.log(data);
       setCardset(data);
-      setCards(data.cards || []);
       setUpdatedTitle(data.title);
       setUpdatedDescription(data.description);
+      setUpdatedVisibility(data.visibility);
     } catch (error) {
       console.error("Error fetching the cardset:", error);
     } finally {
@@ -38,7 +39,7 @@ const AddCards = () => {
 
   useEffect(() => {
     fetchCardset();
-  }, [id, accessToken]);
+  }, [id, accessToken, isModalOpen]);
 
   const validateCard = (card) => {
     const newErrors = [];
@@ -119,6 +120,7 @@ const AddCards = () => {
     const updatedData = {
       title: updatedTitle,
       description: updatedDescription,
+      visibility: updatedVisibility,
     };
 
     try {
@@ -138,7 +140,7 @@ const AddCards = () => {
       }
 
       await fetchCardset();
-      setIsModalOpen(false); 
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating the cardset:", error);
     }
@@ -146,6 +148,15 @@ const AddCards = () => {
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const handleCardUpdate = (updatedCard) => {
+    setCardset((prevCardset) => {
+      const updatedCards = prevCardset.cards.map((card) =>
+        card.card_id === updatedCard.card_id ? updatedCard : card
+      );
+      return { ...prevCardset, cards: updatedCards };
+    });
   };
 
   return (
@@ -160,11 +171,15 @@ const AddCards = () => {
           <p className="text-gray-500 text-center mb-8">
             {cardset?.description || "No description available."}
           </p>
+          <p className={`${cardset?.visibility === "public" ? "text-green-600" : "text-red-600"} text-center mb-8`}>
+            {cardset?.visibility || "No description available."}
+          </p>
 
           <div className="text-center mb-6">
             <button
               onClick={toggleModal}
-              className="text-navy-600 hover:text-navy-800">
+              className="text-navy-600 hover:text-navy-800"
+            >
               <FiEdit className="inline-block mr-2" />
               Edit Cardset
             </button>
@@ -187,7 +202,10 @@ const AddCards = () => {
 
                 <div className="space-y-4 mt-4">
                   <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="title"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Title
                     </label>
                     <input
@@ -199,7 +217,10 @@ const AddCards = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="description"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Description
                     </label>
                     <textarea
@@ -209,15 +230,34 @@ const AddCards = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-navy-500 focus:outline-none"
                     />
                   </div>
+                  <div>
+                    <label
+                      htmlFor="visibility"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Visibility
+                    </label>
+                    <select
+                      id="visibility"
+                      value={updatedVisibility}
+                      onChange={(e) => setUpdatedVisibility(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-navy-500 focus:outline-none"
+                    >
+                      <option value="public">Public</option>
+                      <option value="private">Private</option>
+                    </select>
+                  </div>
                   <div className="mt-4 flex justify-between">
                     <button
                       onClick={toggleModal}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    >
                       Cancel
                     </button>
                     <button
                       onClick={handleUpdateCardset}
-                      className="px-4 py-2 bg-navy-600 text-white rounded-md hover:bg-navy-700 focus:ring-2 focus:ring-navy-500">
+                      className="px-4 py-2 bg-navy-600 text-white rounded-md hover:bg-navy-700 focus:ring-2 focus:ring-navy-500"
+                    >
                       Update Cardset
                     </button>
                   </div>
@@ -243,7 +283,7 @@ const AddCards = () => {
               setNewCard={setNewCard}
               errors={errors}
             />
-            <CardList cards={cards} />
+            <CardList cardset={cardset} onCardUpdate={handleCardUpdate} />
           </div>
         </>
       )}

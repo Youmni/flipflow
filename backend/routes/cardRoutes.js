@@ -25,7 +25,7 @@ router.post(
   (req, res) => cardController.createCard(req, res)
 );
 router.put(
-  "/:set_id/:id",
+  "/update/:set_id/:id",
   (req, res, next) => AuthController.authenticateToken(req, res, next),
   (req, res) => cardController.updateCard(req, res)
 );
