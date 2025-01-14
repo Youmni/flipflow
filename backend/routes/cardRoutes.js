@@ -30,7 +30,7 @@ router.put(
   (req, res) => cardController.updateCard(req, res)
 );
 router.delete(
-  "/:set_id/:id",
+  "/delete/:set_id/:id",
   (req, res, next) => AuthController.authenticateToken(req, res, next),
   (req, res) => cardController.deleteCard(req, res)
 );

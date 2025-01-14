@@ -53,7 +53,7 @@ class CardController{
 
     async deleteCard (req, res) {
         const { set_id, id } = req.params;
-
+        console.log("hier")
         try {
             const [existingCardSet] = await this.connection.promise().query('SELECT * FROM card_sets WHERE id = ?', [set_id]);
 

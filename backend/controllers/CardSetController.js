@@ -83,12 +83,11 @@ class CardSetController {
   }
 
   async deleteCardSet(req, res) {
-    const { card_set_id } = req.params;
-
+    const { id } = req.params;
     try {
       const [existingCardSet] = await this.connection
         .promise()
-        .query("SELECT * FROM card_sets WHERE id = ?", [card_set_id]);
+        .query("SELECT * FROM card_sets WHERE id = ?", [id]);
 
       if (existingCardSet.length === 0) {
         return res.status(404).json({ message: "Card set not found." });
@@ -96,10 +95,10 @@ class CardSetController {
 
       await this.connection
         .promise()
-        .query("DELETE FROM cards WHERE card_set_id = ?", [card_set_id]);
+        .query("DELETE FROM cards WHERE card_set_id = ?", [id]);
       await this.connection
         .promise()
-        .query("DELETE FROM card_sets WHERE id = ?", [card_set_id]);
+        .query("DELETE FROM card_sets WHERE id = ?", [id]);
 
       res.status(200).json({ message: "Card set deleted successfully." });
     } catch (err) {

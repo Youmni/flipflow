@@ -31,6 +31,10 @@ const AddCardset = () => {
     setCardset({ ...cardset, [name]: value });
   };
 
+  const handleGoingBack = () => {
+    navigate("/cards");
+  };
+
   const validateForm = () => {
     const newErrors = [];
 
@@ -100,6 +104,7 @@ const AddCardset = () => {
           </ul>
         </div>
       )}
+      <p onClick={handleGoingBack} className="text-right underline hover:text-navy-500 cursor-pointer">Back</p>
       <h1 className="text-3xl font-bold text-center text-navy-700 mb-6">
         Create a Cardset
       </h1>

@@ -58,7 +58,7 @@ const Overview = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition duration-300"
-          placeholder="Search by title, description or tag..."
+          placeholder="Search by title or description"
         />
         <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600">
           <span className="material-icons">search</span>

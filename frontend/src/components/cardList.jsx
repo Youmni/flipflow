@@ -1,7 +1,8 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../components/authProvider";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 
-const CardList = ({ cardset, onCardUpdate }) => {
+const CardList = ({ cardset, onCardUpdate, onCardDelete }) => {
   const [isEditing, setIsEditing] = useState(null);
   const [updatedCard, setUpdatedCard] = useState({ question: "", answer: "" });
   const [errors, setErrors] = useState([]);
@@ -39,20 +40,43 @@ const CardList = ({ cardset, onCardUpdate }) => {
     return newErrors.length === 0;
   };
 
+  const handleDeleteCard = async (setId, cardId) => {
+    try {
+      const response = await fetch(`/api/cards/delete/${setId}/${cardId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response data:", errorData);
+        throw new Error(`Failed to delete card: ${response.statusText}`);
+      }
+      onCardDelete(cardId);
+    } catch (error) {
+      console.error("Error deleting the card:", error);
+    }
+  };
+
   const handleUpdateCard = async (cardId) => {
     if (!validateCard()) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/cards/update/${cardset.card_set_id}/${cardId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(updatedCard),
-      });
+      const response = await fetch(
+        `/api/cards/update/${cardset.card_set_id}/${cardId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(updatedCard),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -64,7 +88,6 @@ const CardList = ({ cardset, onCardUpdate }) => {
       setUpdatedCard({ question: "", answer: "" });
 
       onCardUpdate({ ...updatedCard, card_id: cardId });
-
     } catch (error) {
       console.error("Error updating the card:", error);
     }
@@ -83,7 +106,10 @@ const CardList = ({ cardset, onCardUpdate }) => {
               {isEditing === card.card_id ? (
                 <div>
                   <div>
-                    <label htmlFor={`question-${card.card_id}`} className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor={`question-${card.card_id}`}
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Question
                     </label>
                     <input
@@ -96,7 +122,10 @@ const CardList = ({ cardset, onCardUpdate }) => {
                     />
                   </div>
                   <div>
-                    <label htmlFor={`answer-${card.card_id}`} className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor={`answer-${card.card_id}`}
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Answer
                     </label>
                     <textarea
@@ -123,12 +152,20 @@ const CardList = ({ cardset, onCardUpdate }) => {
                     >
                       Cancel
                     </button>
-                    <button
-                      onClick={() => handleUpdateCard(card.card_id)}
-                      className="px-4 py-2 bg-navy-600 text-white rounded-md hover:bg-navy-700 focus:ring-2 focus:ring-navy-500"
-                    >
-                      Save Changes
-                    </button>
+                    <div className="flex flex-row space-x-2">
+                      <button
+                        onClick={() => handleUpdateCard(card.card_id)}
+                        className="px-4 py-2 bg-navy-600 text-white rounded-md hover:bg-navy-700 focus:ring-2 focus:ring-navy-500"
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCard(cardset.card_set_id, card.card_id)}
+                        className="text-red-500 hover:text-red-700 flex items-center space-x-2"
+                      >
+                        <FiTrash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (

@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import { AuthContext } from "../components/authProvider";
 import AddCardForm from "./addCardForm";
 import CardList from "./cardList";
-import { FiEdit } from "react-icons/fi";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const AddCards = () => {
   const { id } = useParams();
@@ -17,6 +18,8 @@ const AddCards = () => {
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [updatedVisibility, setUpdatedVisibility] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
   updatedVisibility;
   const fetchCardset = async () => {
     try {
@@ -112,6 +115,26 @@ const AddCards = () => {
     }
   };
 
+  const handleDeleteCardset = async (set_id) => {
+    try {
+      const response = await fetch(`/api/cardsets/delete/${set_id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response data:", errorData);
+        throw new Error(`Failed to delete set: ${response.statusText}`);
+      }
+      navigate("/cards");
+    } catch (error) {
+      console.error("Error deleting the set:", error);
+    }
+  };
+
   const handleUpdateCardset = async () => {
     if (!validateCardset()) {
       return;
@@ -150,10 +173,23 @@ const AddCards = () => {
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleGoingBack = () => {
+    navigate("/cards");
+  };
+  
   const handleCardUpdate = (updatedCard) => {
     setCardset((prevCardset) => {
       const updatedCards = prevCardset.cards.map((card) =>
         card.card_id === updatedCard.card_id ? updatedCard : card
+      );
+      return { ...prevCardset, cards: updatedCards };
+    });
+  };
+
+  const handleCardDelete = (deletedCardId) => {
+    setCardset((prevCardset) => {
+      const updatedCards = prevCardset.cards.filter(
+        (card) => card.card_id !== deletedCardId
       );
       return { ...prevCardset, cards: updatedCards };
     });
@@ -165,16 +201,28 @@ const AddCards = () => {
         <div className="text-center text-gray-500">Loading...</div>
       ) : (
         <>
+          {" "}
+          <p
+            onClick={handleGoingBack}
+            className="text-right underline hover:text-navy-500 cursor-pointer"
+          >
+            Back
+          </p>
           <h1 className="text-2xl font-bold text-center text-navy-700 mb-6">
             {cardset?.title || "Cardset"}
           </h1>
           <p className="text-gray-500 text-center mb-8">
             {cardset?.description || "No description available."}
           </p>
-          <p className={`${cardset?.visibility === "public" ? "text-green-600" : "text-red-600"} text-center mb-8`}>
+          <p
+            className={`${
+              cardset?.visibility === "public"
+                ? "text-green-600"
+                : "text-red-600"
+            } text-center mb-8`}
+          >
             {cardset?.visibility || "No description available."}
           </p>
-
           <div className="text-center mb-6">
             <button
               onClick={toggleModal}
@@ -184,12 +232,18 @@ const AddCards = () => {
               Edit Cardset
             </button>
           </div>
-
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
               <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-xl font-semibold">Update Cardset</h2>
-
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">Update Cardset</h2>
+                  <button
+                    onClick={() => handleDeleteCardset(cardset?.card_set_id)}
+                    className="text-red-500 hover:text-red-700 flex items-center space-x-2"
+                  >
+                    <FiTrash2 className="w-5 h-5" />
+                  </button>
+                </div>
                 {cardsetErrors.length > 0 && (
                   <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-md">
                     <ul className="text-red-700">
@@ -247,7 +301,7 @@ const AddCards = () => {
                       <option value="private">Private</option>
                     </select>
                   </div>
-                  <div className="mt-4 flex justify-between">
+                  <div className="mt-4 flex justify-between items-center">
                     <button
                       onClick={toggleModal}
                       className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
@@ -265,7 +319,6 @@ const AddCards = () => {
               </div>
             </div>
           )}
-
           {errors.length > 0 && (
             <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-md">
               <ul className="text-red-700">
@@ -275,7 +328,6 @@ const AddCards = () => {
               </ul>
             </div>
           )}
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AddCardForm
               onAddCard={handleAddCard}
@@ -283,7 +335,11 @@ const AddCards = () => {
               setNewCard={setNewCard}
               errors={errors}
             />
-            <CardList cardset={cardset} onCardUpdate={handleCardUpdate} />
+            <CardList
+              cardset={cardset}
+              onCardUpdate={handleCardUpdate}
+              onCardDelete={handleCardDelete}
+            />
           </div>
         </>
       )}
