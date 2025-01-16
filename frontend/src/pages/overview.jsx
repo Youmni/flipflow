@@ -73,10 +73,10 @@ const Overview = () => {
               className="bg-white p-6 shadow-lg rounded-xl border border-gray-200 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               onClick={() => handleCardClick(card.id)}
             >
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              <h2 className="text-xl font-semibold text-gray-800 mb-3 truncate">
                 {card.title || "Card Title"}
               </h2>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-4 truncate">
                 {card.description || "No description available."}
               </p>
               <p className="text-gray-500 text-sm">

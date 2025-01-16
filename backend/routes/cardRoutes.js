@@ -35,5 +35,6 @@ router.delete(
   (req, res) => cardController.deleteCard(req, res)
 );
 router.get("/:set_id/:id", (req, res) => cardController.getCardById(req, res));
+router.get("/all", (req, res) => cardController.getAllCards(req, res));
 
 export default router;

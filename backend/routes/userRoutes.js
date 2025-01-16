@@ -27,6 +27,12 @@ router.put(
   validateUser,
   (req, res) => userController.updateUser(req, res)
 );
+router.delete(
+  "/delete/:id",
+  (req, res, next) => AuthController.authenticateToken(req, res, next),
+  validateUser,
+  (req, res) => userController.deleteUser(req, res)
+);
 router.patch(
   "/update/password/:id",
   (req, res, next) => AuthController.authenticateToken(req, res, next),
@@ -34,5 +40,8 @@ router.patch(
   (req, res) => userController.updatePassword(req, res)
 );
 router.get("/:id", (req, res) => userController.getUserById(req, res));
+
+router.get("/",  (req, res, next) => AuthController.authenticateToken(req, res, next),
+(req, res) => userController.getAllUsers(req, res));
 
 export default router;

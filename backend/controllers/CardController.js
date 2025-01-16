@@ -98,5 +98,18 @@ class CardController{
             res.status(500).json({ message: 'There was an error fetching the card.', error: err.message });
         }
     };
+
+    async getAllCards (req, res) {
+
+        try {
+
+            const [cards] = await this.connection.promise().query('SELECT * FROM cards');
+
+            res.status(200).json(cards);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'There was an error fetching the cards.', error: err.message });
+        }
+    };
 }
 export default CardController;

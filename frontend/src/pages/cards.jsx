@@ -39,7 +39,14 @@ const Cards = () => {
       setLoading(true);
       try {
         const response = await axios.get(`/api/cardsets/${userId}`, {
-          params: { search, limit, offset: (currentPage - 1) * limit },
+          params: {
+            search,
+            limit,
+            offset: (currentPage - 1) * limit,
+          },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
 
         setTotalPages(Math.ceil(response.data.metadata.count / limit));

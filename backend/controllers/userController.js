@@ -29,6 +29,27 @@ class UserController{
         }
     }
 
+    async deleteUser(req, res) {
+        try {
+            const { id } = req.params;
+    
+            if (!id) {
+                return res.status(400).json({ message: 'User ID is required' });
+            }
+    
+            const [result] = await this.connection.promise().query('DELETE FROM users WHERE id = ?', [id]);
+    
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: `No user found with ID ${id}` });
+            }
+                
+            res.status(200).json({ message: `User with ID ${id} has been deleted successfully` });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'There was an error deleting the user', error: err.message });
+        }
+    }
+
     async updateUser (req, res){
 
         const { first_name, last_name, username, email} = req.body;
@@ -89,6 +110,17 @@ class UserController{
         }catch(err){
             console.error(err);
             res.status(500).json({ message: 'There was an error fetching the user: ', error: err.message });
+        }
+    }
+
+    async getAllUsers (req, res){
+        try{
+            const [users] = await this.connection.promise().query('SELECT * FROM users');
+
+            res.status(200).json({ users: users });
+        }catch(err){
+            console.error(err);
+            res.status(500).json({ message: 'There was an error fetching the users: ', error: err.message });
         }
     }
 }

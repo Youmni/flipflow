@@ -5,6 +5,16 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import "../css/cardsetDetails.css";
 import { useSnackbar } from "notistack";
 
+const speak = (text) => {
+  if (!text) return;
+  console.log(window.speechSynthesis.getVoices());
+
+  const synth = window.speechSynthesis;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ja-JP";
+  synth.speak(utterance);
+};
+
 const CardSetDetails = () => {
   const { setId } = useParams();
   const [loading, setLoading] = useState(true);
@@ -20,6 +30,8 @@ const CardSetDetails = () => {
       try {
         const response = await axios.get(`/api/cardsets/cards/${setId}`);
         setCardset(response.data);
+        if (response.data.title) {
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -32,16 +44,19 @@ const CardSetDetails = () => {
 
   const handlePrevCard = () => {
     setShowAnswer(false);
-    setCurrentCardIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : prevIndex
-    );
+    setCurrentCardIndex((prevIndex) => {
+      const newIndex = prevIndex > 0 ? prevIndex - 1 : prevIndex;
+      return newIndex;
+    });
   };
 
   const handleNextCard = () => {
     setShowAnswer(false);
-    setCurrentCardIndex((prevIndex) =>
-      prevIndex < cardset.cards.length - 1 ? prevIndex + 1 : prevIndex
-    );
+    setCurrentCardIndex((prevIndex) => {
+      const newIndex =
+        prevIndex < cardset.cards.length - 1 ? prevIndex + 1 : prevIndex;
+      return newIndex;
+    });
   };
 
   if (loading) {
@@ -64,7 +79,12 @@ const CardSetDetails = () => {
 
       <div
         className="flip-card cursor-pointer"
-        onClick={() => setShowAnswer(!showAnswer)}
+        onClick={() => {
+          setShowAnswer(!showAnswer);
+          if (!showAnswer) {
+            speak(currentCard.answer);
+          }
+        }}
       >
         <div className={`flip-card-inner ${showAnswer ? "flipped" : ""}`}>
           <div className="flip-card-front">

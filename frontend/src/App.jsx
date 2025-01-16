@@ -9,6 +9,7 @@ import Register from "./pages/register";
 import Header from "./components/header";
 import AddCardset from "./components/addCardset";
 import AddCards from "./components/addCards";
+import Documentation from "./components/documentation";
 
 import "./App.css";
 
@@ -24,6 +25,7 @@ function App() {
         <div className="flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto bg-gray-100 p-4">
             <Routes>
+              <Route path="/" element={<Documentation />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/quiz" element={<Quiz />} />
               <Route path="/cards" element={<Cards />} />

@@ -43,8 +43,10 @@ router.get("/", (req, res) =>
   cardSetController.getAllCardSetsWithSearch(req, res)
 );
 router.get("/all", (req, res) => cardSetController.getAllCardSets(req, res));
-router.get("/:userId", (req, res) =>
-  cardSetController.getCardSetByUserId(req, res)
+router.get(
+  "/:userId",
+  (req, res, next) => AuthController.authenticateToken(req, res, next),
+  (req, res) => cardSetController.getCardSetByUserId(req, res)
 );
 router.get("/cards/:id", (req, res) =>
   cardSetController.getCardSetWithCardsById(req, res)
