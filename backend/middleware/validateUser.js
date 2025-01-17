@@ -3,11 +3,13 @@ import Joi from 'joi';
 const validateUser = (req, res, next) => {
   const schema = Joi.object({
     first_name: Joi.string().min(3).max(50).pattern(/^[a-zA-Z\s]+$/).messages({
+      "string.min": "Firstname must be atleast 3 characters.",
       'string.max': 'First name cannot be longer than 50 characters.',
       'string.pattern.base': 'Last name cannot contain numbers or special characters.',
       'any.required': 'First name is required.'
     }),
     last_name: Joi.string().min(3).max(50).pattern(/^[a-zA-Z\s]+$/).messages({
+      "string.min": "Lastname must be atleast 3 characters.",
       'string.max': 'Last name cannot be longer than 50 characters.',
       'string.pattern.base': 'Last name cannot contain numbers or special characters.',
       'any.required': 'Last name is required.'
