@@ -29,6 +29,9 @@ const Register = () => {
   const togglePasswordVisibility = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
+  const handleClickLogin = async () => {
+    navigate("/login");
+  }
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -151,6 +154,7 @@ const Register = () => {
         >
           {loading ? <FiLoader className="animate-spin text-xl" /> : "Register"}
         </button>
+        <p className="text-right">Already registrated? <span onClick={handleClickLogin} className="text-green-600 underline cursor-pointer hover:text-green-400">login</span></p>
       </form>
     </div>
   );

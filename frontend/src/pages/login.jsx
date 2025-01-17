@@ -55,6 +55,10 @@ const Login = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
+  const handleRegistration = async () => {
+    navigate("/register");
+  }
+
   const handleClick = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -161,6 +165,7 @@ const Login = () => {
                 "Login"
               )}
             </button>
+            <p className="text-right">No account yet? <span onClick={handleRegistration} className="underline font-semibold text-green-600 cursor-pointer">Registration</span></p>
           </div>
         </div>
       </form>
