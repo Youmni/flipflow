@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "../components/authProvider";
+import { AuthContext } from "../../components/AuthProvider";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 const CardList = ({ cardset, onCardUpdate, onCardDelete }) => {

@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { useLocation, Routes, Route } from 'react-router-dom';
-import Quiz from "./pages/quiz";
-import Overview from "./pages/overview";
-import Cards from "./pages/cards";
-import CardSetDetails from "./pages/cardSetDetails"
-import Login from "./pages/login"; 
-import Register from "./pages/register";
-import Header from "./components/header";
-import AddCardset from "./components/addCardset";
-import AddCards from "./components/addCards";
-import Documentation from "./components/documentation";
+import CardSetOverview from "./pages/public/CardSetOverview";
+import CardSetDetails from "./pages/public/CardSetDetails"
+import Cards from "./pages/authenticated/UserCardSets";
+import Login from "./pages/public/Login"; 
+import Register from "./pages/public/Register";
+import Header from "./components/layout/Header";
+import AddCardset from "./components/cards/AddCardset";
+import AddCards from "./components/cards/AddCard";
+import Documentation from "./pages/public/Documentation";
 
 import "./App.css";
 
@@ -26,8 +25,7 @@ function App() {
           <div className="flex-1 overflow-auto bg-gray-100 p-4">
             <Routes>
               <Route path="/" element={<Documentation />} />
-              <Route path="/overview" element={<Overview />} />
-              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/overview" element={<CardSetOverview />} />
               <Route path="/cards" element={<Cards />} />
               <Route path="/cardsets/:setId" element={<CardSetDetails />} />
               <Route path="/login" element={<Login />} /> 

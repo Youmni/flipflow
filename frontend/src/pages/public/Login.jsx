@@ -2,7 +2,7 @@ import {useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { AuthContext } from "../components/authProvider";
+import { AuthContext } from "../../components/AuthProvider";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useSnackbar } from "notistack";
 import { FiLoader } from "react-icons/fi";

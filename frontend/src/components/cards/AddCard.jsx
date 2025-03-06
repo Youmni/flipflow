@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { AuthContext } from "../components/authProvider";
-import AddCardForm from "./addCardForm";
-import CardList from "./cardList";
+import { AuthContext } from "../../components/AuthProvider";
+import AddCardForm from "../cards/AddCardForm";
+import CardList from "./CardList";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 

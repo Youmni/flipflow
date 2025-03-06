@@ -3,7 +3,7 @@ import axios from "axios";
 import moment from "moment";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../components/authProvider";
+import { AuthContext } from "../../components/AuthProvider";
 import { jwtDecode } from "jwt-decode";
 
 const Cards = () => {

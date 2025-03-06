@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import { AuthContext } from "../components/authProvider";
+import { AuthContext } from "../../components/AuthProvider";
 import { useNavigate } from "react-router-dom";
 
 const AddCardset = () => {

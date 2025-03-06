@@ -6,7 +6,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 
-const Overview = () => {
+const CardSetOverview = () => {
   const [loading, setLoading] = useState(true);
   const [cardset, setCardset] = useState([]);
   const [search, setSearch] = useState("");
@@ -116,4 +116,4 @@ const Overview = () => {
   );
 };
 
-export default Overview;
+export default CardSetOverview;

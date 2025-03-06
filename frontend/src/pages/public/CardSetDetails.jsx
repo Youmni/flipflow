@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import "../css/cardsetDetails.css";
+import "../../css/cardsetDetails.css";
 import { useSnackbar } from "notistack";
 
 const speak = (text) => {
