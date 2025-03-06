@@ -49,9 +49,8 @@ export const AuthProvider = ({ children }) => {
       console.log('Access token refreshed:', response.data);
 
       const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
-      // Stel de cookies in met de gewenste vervaldata
-      Cookies.set('accessToken', newAccessToken, { expires: 1 / 24 }); // 1 uur geldig
-      Cookies.set('refreshToken', newRefreshToken, { expires: 7 }); // 7 dagen geldig
+      Cookies.set('accessToken', newAccessToken, { expires: 1 / 24 / 4 });
+      Cookies.set('refreshToken', newRefreshToken, { expires: 7 });
 
       setAccessToken(newAccessToken);
       setRefreshToken(newRefreshToken);
@@ -66,7 +65,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Functie om de userId uit de access token te halen
   const getUserIdFromToken = (token) => {
     try {
       console.log(token);

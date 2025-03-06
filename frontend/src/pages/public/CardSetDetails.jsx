@@ -1,19 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaVolumeUp } from "react-icons/fa";
 import "../../css/cardsetDetails.css";
 import { useSnackbar } from "notistack";
-
-const speak = (text) => {
-  if (!text) return;
-  console.log(window.speechSynthesis.getVoices());
-
-  const synth = window.speechSynthesis;
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "ja-JP";
-  synth.speak(utterance);
-};
 
 const CardSetDetails = () => {
   const { setId } = useParams();
@@ -21,6 +11,9 @@ const CardSetDetails = () => {
   const [cardset, setCardset] = useState({});
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
@@ -30,33 +23,52 @@ const CardSetDetails = () => {
       try {
         const response = await axios.get(`/api/cardsets/cards/${setId}`);
         setCardset(response.data);
-        if (response.data.title) {
-        }
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [setId]);
 
+  useEffect(() => {
+    const loadVoices = () => {
+      const synth = window.speechSynthesis;
+      let availableVoices = synth.getVoices();
+      let uniqueLanguages = [...new Set(availableVoices.map(v => v.lang))];
+      setVoices(uniqueLanguages);
+      if (uniqueLanguages.length > 0) {
+        setSelectedVoice(uniqueLanguages[0]);
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
+  const speak = (text) => {
+    if (!text || !isSpeechEnabled) return;
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = selectedVoice;
+    synth.speak(utterance);
+  };
+
+  useEffect(() => {
+    if (cardset.cards && cardset.cards.length > 0) {
+      speak(cardset.cards[currentCardIndex].question);
+    }
+  }, [currentCardIndex, cardset]);
+
   const handlePrevCard = () => {
     setShowAnswer(false);
-    setCurrentCardIndex((prevIndex) => {
-      const newIndex = prevIndex > 0 ? prevIndex - 1 : prevIndex;
-      return newIndex;
-    });
+    setCurrentCardIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
 
   const handleNextCard = () => {
     setShowAnswer(false);
-    setCurrentCardIndex((prevIndex) => {
-      const newIndex =
-        prevIndex < cardset.cards.length - 1 ? prevIndex + 1 : prevIndex;
-      return newIndex;
-    });
+    setCurrentCardIndex((prevIndex) => Math.min(prevIndex + 1, cardset.cards.length - 1));
   };
 
   if (loading) {
@@ -71,31 +83,45 @@ const CardSetDetails = () => {
   const currentCard = cardset.cards[currentCardIndex];
 
   return (
-    <div className="p-6 max-w-screen-md mx-auto bg-white rounded-lg shadow-md border border-gray-200">
-      <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
-        {cardset.title}
-      </h1>
-      <p className="text-gray-600 text-center mb-6">{cardset.description}</p>
+    <div className="p-6 max-w-screen-md mx-auto bg-white rounded-lg shadow-md border border-gray-200 relative">
+      <button 
+        onClick={() => speak(showAnswer ? currentCard.answer : currentCard.question)}
+        className="absolute top-4 right-4 px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-500"
+      >
+        <FaVolumeUp /> Read Aloud
+      </button>
 
+      <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">{cardset.title}</h1>
+      <p className="text-gray-600 text-center mb-6">{cardset.description}</p>
+      
+      <div className="flex flex-col items-start mb-4">
+        <select
+          className="border p-2 rounded-lg mb-2"
+          value={selectedVoice || ""}
+          onChange={(e) => setSelectedVoice(e.target.value)}
+        >
+          {voices.map((lang) => (
+            <option key={lang} value={lang}>
+              {lang}
+            </option>
+          ))}
+        </select>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={isSpeechEnabled} onChange={() => setIsSpeechEnabled(!isSpeechEnabled)} />
+          <FaVolumeUp size={20} />
+        </label>
+      </div>
+      
       <div
         className="flip-card cursor-pointer"
-        onClick={() => {
-          setShowAnswer(!showAnswer);
-          if (!showAnswer) {
-            speak(currentCard.answer);
-          }
-        }}
+        onClick={() => setShowAnswer(!showAnswer)}
       >
         <div className={`flip-card-inner ${showAnswer ? "flipped" : ""}`}>
           <div className="flip-card-front">
-            <p className="text-lg text-gray-800 font-medium">
-              {currentCard.question}
-            </p>
+            <p className="text-lg text-gray-800 font-medium">{currentCard.question}</p>
           </div>
           <div className="flip-card-back">
-            <p className="text-lg text-gray-800 font-medium">
-              {currentCard.answer}
-            </p>
+            <p className="text-lg text-gray-800 font-medium">{currentCard.answer}</p>
           </div>
         </div>
       </div>
@@ -105,35 +131,22 @@ const CardSetDetails = () => {
           onClick={handlePrevCard}
           disabled={currentCardIndex === 0}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-            currentCardIndex === 0
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-teal-600 text-white hover:bg-teal-500"
+            currentCardIndex === 0 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-teal-600 text-white hover:bg-teal-500"
           }`}
         >
-          <FaArrowLeft />
-          Previous
+          <FaArrowLeft /> Previous
         </button>
         <div className="text-gray-600">
-          Card{" "}
-          <span className="font-semibold text-gray-800">
-            {currentCardIndex + 1}
-          </span>{" "}
-          of{" "}
-          <span className="font-semibold text-gray-800">
-            {cardset.cards.length}
-          </span>
+          Card <span className="font-semibold text-gray-800">{currentCardIndex + 1}</span> of <span className="font-semibold text-gray-800">{cardset.cards.length}</span>
         </div>
         <button
           onClick={handleNextCard}
           disabled={currentCardIndex === cardset.cards.length - 1}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-            currentCardIndex === cardset.cards.length - 1
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-teal-600 text-white hover:bg-teal-500"
+            currentCardIndex === cardset.cards.length - 1 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-teal-600 text-white hover:bg-teal-500"
           }`}
         >
-          Next
-          <FaArrowRight />
+          Next <FaArrowRight />
         </button>
       </div>
     </div>

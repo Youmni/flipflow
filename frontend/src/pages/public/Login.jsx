@@ -72,7 +72,7 @@ const Login = () => {
       if (response.status === 200) {
         const { accessToken, refreshToken } = response.data;
 
-        const tokenExpiryTime = 1 / 24;
+        const tokenExpiryTime = 1 / 24 / 4;
         Cookies.set("accessToken", accessToken, {
           secure: false,
           sameSite: "Strict",
