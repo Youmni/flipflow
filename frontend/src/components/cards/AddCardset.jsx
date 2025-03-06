@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../../components/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AddCardset = () => {
   const [cardset, setCardset] = useState({
@@ -66,30 +67,23 @@ const AddCardset = () => {
     }
 
     try {
-      const response = await fetch(`/api/cardsets/create/${userId}`, {
-        method: "POST",
+      const response = await axios.post(`/api/cardsets/create/${userId}`, cardset, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(cardset),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrors(errorData.message);
-        console.error("Error response data:", errorData);
-        throw new Error(
-          `Failed to create cardset: ${response.statusText || "Unknown error"}`
-        );
-      }
-
-      const responseData = await response.json();
       setErrors([]);
-      console.log("Response data:", responseData);
+      console.log("Response data:", response.data);
       navigate("/cards");
     } catch (error) {
-      console.error("Error creating cardset:", error.message);
+      if (error.response) {
+        setErrors(error.response.data.message || ["An error occurred"]);
+        console.error("Error response data:", error.response.data);
+      } else {
+        console.error("Error creating cardset:", error.message);
+      }
     }
   };
 
@@ -110,10 +104,7 @@ const AddCardset = () => {
       </h1>
       <form className="space-y-6">
         <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Title
           </label>
           <input
@@ -130,10 +121,7 @@ const AddCardset = () => {
           />
         </div>
         <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
             Description
           </label>
           <textarea
@@ -149,10 +137,7 @@ const AddCardset = () => {
           ></textarea>
         </div>
         <div>
-          <label
-            htmlFor="visibility"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="visibility" className="block text-sm font-medium text-gray-700">
             Visibility
           </label>
           <select

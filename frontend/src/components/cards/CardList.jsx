@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../components/AuthProvider";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import axios from "axios";
 
 const CardList = ({ cardset, onCardUpdate, onCardDelete }) => {
   const [isEditing, setIsEditing] = useState(null);
@@ -42,21 +43,19 @@ const CardList = ({ cardset, onCardUpdate, onCardDelete }) => {
 
   const handleDeleteCard = async (setId, cardId) => {
     try {
-      const response = await fetch(`/api/cards/delete/${setId}/${cardId}`, {
-        method: "DELETE",
+      await axios.delete(`/api/cards/delete/${setId}/${cardId}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response data:", errorData);
-        throw new Error(`Failed to delete card: ${response.statusText}`);
-      }
       onCardDelete(cardId);
     } catch (error) {
-      console.error("Error deleting the card:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      } else {
+        console.error("Error deleting the card:", error);
+      }
     }
   };
 
@@ -66,30 +65,26 @@ const CardList = ({ cardset, onCardUpdate, onCardDelete }) => {
     }
 
     try {
-      const response = await fetch(
+      await axios.put(
         `/api/cards/update/${cardset.card_set_id}/${cardId}`,
+        updatedCard,
         {
-          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify(updatedCard),
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response data:", errorData);
-        throw new Error(`Failed to update card: ${response.statusText}`);
-      }
-
       setIsEditing(null);
       setUpdatedCard({ question: "", answer: "" });
-
       onCardUpdate({ ...updatedCard, card_id: cardId });
     } catch (error) {
-      console.error("Error updating the card:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      } else {
+        console.error("Error updating the card:", error);
+      }
     }
   };
 

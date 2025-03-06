@@ -108,7 +108,7 @@ const Login = () => {
         <div className="md:flex-1 bg-gradient-to-br from-navy-500 to-navy-800">
           <header className="flex flex-col justify-center h-full p-10 text-center md:text-left">
             <h1 className="text-4xl text-white font-extralight">Welcome,</h1>
-            <h2 className="text-3xl text-white font-bold">SafeCircle admin</h2>
+            <h2 className="text-3xl text-white font-bold">FlipFlow user</h2>
           </header>
         </div>
         <div className="md:flex-1 bg-white p-10 flex flex-col justify-center">

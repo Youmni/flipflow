@@ -4,7 +4,6 @@ import moment from "moment";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../components/AuthProvider";
-import { jwtDecode } from "jwt-decode";
 
 const Cards = () => {
   const [loading, setLoading] = useState(true);
@@ -13,28 +12,11 @@ const Cards = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const { accessToken } = useContext(AuthContext);
+  const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
   const limit = 12;
 
-  const getUserIdFromToken = (token) => {
-    try {
-      console.log(accessToken);
-      const decoded = jwtDecode(token);
-      console.log(decoded.userId);
-      return decoded.userId;
-    } catch (error) {
-      console.error("Fout bij het decoderen van het token:", error);
-      return null;
-    }
-  };
-
-  const userId = getUserIdFromToken(accessToken);
-
   useEffect(() => {
-    if (!userId) {
-      return;
-    }
-
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -48,7 +30,6 @@ const Cards = () => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-
         setTotalPages(Math.ceil(response.data.metadata.count / limit));
         setCardset(response.data.cardSets);
       } catch (error) {
