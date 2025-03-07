@@ -4,7 +4,7 @@
 
 ## Overview
 
-FlipFlow enables users to organize their learning process by creating card sets, adding cards, and managing these sets with other users. The platform also offers public and private card sets for various subjects.
+FlipFlow enables users to organize their learning process by creating cardsets, adding cards, and sharing these sets with other users.
 
 ## Key Features
 
@@ -12,7 +12,7 @@ FlipFlow enables users to organize their learning process by creating card sets,
 - **Create a card set:** Users can create a new set of cards for studying or other purposes.
 - **Add cards to a set:** Users can add individual cards to a set to enhance learning.
 - **View public sets with cards:** Users can explore all public sets and learn from shared content.
-- **Edit or delete sets and individual cards:** Users can manage their sets, including editing or deleting tasks. Group members (with the right permissions) can also perform these actions.
+- **Edit or delete sets and individual cards:** Users can manage their sets, including editing or deleting sets and cards.
 
 ## Installation Guide
 
@@ -45,7 +45,7 @@ FlipFlow enables users to organize their learning process by creating card sets,
     npm run dev
     ```
 
-4. You will see a domain or URL printed in the terminal, typically something like `http://localhost:3000`. Open this URL in your browser to access the web application.
+4. You will see a domain or URL printed in the terminal, typically something like `http://localhost:5173`. Open this URL in your browser to access the web application.
 
 ---
 
@@ -69,20 +69,17 @@ FlipFlow enables users to organize their learning process by creating card sets,
     ACCESS_TOKEN_EXPIRY=15m
     REFRESH_TOKEN_EXPIRY=7d
     ```
+ 4. Create the tables and insert dummy data:
+
+    ```bash
+    node setup.js
+    ```
 
 3. Start the backend server using Node.js:
 
     ```bash
     node server.js
     ```
-
----
-
-## Sources
-[@ChatGPT Documentation (1)](https://chatgpt.com/share/6789af8e-6e60-8005-952c-45c9945d45cd).
-> The other part couldn't be uploaded: ![image](https://github.com/user-attachments/assets/ec7e0964-1754-4d23-92d3-4867f67ff51e)
-
-
 
 ---
 
