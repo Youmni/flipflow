@@ -11,14 +11,6 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(Cookies.get('refreshToken') || null);
   const navigate = useNavigate();
 
-  // Als er geen accessToken en refreshToken beschikbaar zijn, stuur de gebruiker naar login
-  useEffect(() => {
-    if (!accessToken && !refreshToken) {
-      console.log('No access token or refresh token found');
-      navigate('/login');
-    }
-  }, [accessToken, refreshToken, navigate]);
-
   useEffect(() => {
     const responseInterceptor = axios.interceptors.response.use(
       (response) => response,
@@ -42,7 +34,6 @@ export const AuthProvider = ({ children }) => {
     );
   }, [accessToken, refreshToken]);
 
-  // Functie om het access token te verversen
   const refreshAccessToken = async () => {
     try {
       const response = await axios.post('/api/authenticate/refresh-token', { refreshToken });

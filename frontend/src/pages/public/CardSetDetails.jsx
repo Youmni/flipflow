@@ -86,7 +86,13 @@ const CardSetDetails = () => {
         <title>FlipFlow - {cardset.title}</title>
       </Helmet>
       <div className="p-6 max-w-screen-md mx-auto bg-white rounded-lg shadow-md border border-gray-200 relative">
-        <div className="absolute top-4 right-4 flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <p
+            onClick={handleGoingBack}
+            className="underline text-blue-600 hover:text-blue-500 cursor-pointer"
+          >
+            Back
+          </p>
           <button
             onClick={() =>
               speak(showAnswer ? currentCard.answer : currentCard.question)
@@ -95,12 +101,6 @@ const CardSetDetails = () => {
           >
             <FaVolumeUp />
           </button>
-          <p
-            onClick={handleGoingBack}
-            className="underline text-blue-600 hover:text-blue-500 cursor-pointer"
-          >
-            Back
-          </p>
         </div>
 
         <h1 className="text-3xl font-semibold text-center mb-4 text-gray-800">
