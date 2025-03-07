@@ -56,12 +56,6 @@ const CardSetDetails = () => {
     synth.speak(utterance);
   };
 
-  useEffect(() => {
-    if (cardset.cards && cardset.cards.length > 0) {
-      speak(cardset.cards[currentCardIndex].question);
-    }
-  }, [currentCardIndex, cardset]);
-
   const handlePrevCard = () => {
     setShowAnswer(false);
     setCurrentCardIndex((prevIndex) => Math.max(prevIndex - 1, 0));
@@ -126,14 +120,6 @@ const CardSetDetails = () => {
               </option>
             ))}
           </select>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={isSpeechEnabled}
-              onChange={() => setIsSpeechEnabled(!isSpeechEnabled)}
-            />
-            <FaVolumeUp size={20} />
-          </label>
         </div>
 
         <div

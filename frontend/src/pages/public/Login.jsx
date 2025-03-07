@@ -33,7 +33,7 @@ const Login = () => {
           setRefreshToken(refreshToken);
 
           enqueueSnackbar("Automatically logged in", { variant: "success" });
-          navigate("/overview");
+          navigate("/");
         } catch (error) {
           console.error("Error refreshing token:", error);
         } finally {
@@ -87,7 +87,7 @@ const Login = () => {
         });
         setAccessToken(accessToken);
         enqueueSnackbar("Succesfull login", { variant: "success" });
-        navigate("/overview");
+        navigate("/");
       }
     } catch (e) {
       if (e.response && e.response.status === 401) {

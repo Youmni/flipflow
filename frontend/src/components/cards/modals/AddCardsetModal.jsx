@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import {jwtDecode} from "jwt-decode";
-import { AuthContext } from "../AuthProvider";
+import { AuthContext } from "../../AuthProvider";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 

@@ -4,7 +4,7 @@ import moment from "moment";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../components/AuthProvider";
-import AddCardsetModal from "../../components/cards/AddCardsetModal";
+import AddCardsetModal from "../../components/cards/modals/AddCardsetModal";
 import { Helmet } from "react-helmet-async";
 
 const Cards = () => {
