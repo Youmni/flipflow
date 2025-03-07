@@ -213,13 +213,18 @@ class CardSetController {
     try {
       const query = `
         SELECT 
-        c.id, 
-        c.title, 
-        c.description, 
-        c.visibility, 
-        c.created_at
+            c.id, 
+            c.title, 
+            c.description, 
+            c.visibility, 
+            c.created_at
         FROM card_sets c
-        WHERE (c.title LIKE ? OR c.description LIKE ?) AND c.visibility = 'public'
+        WHERE 
+            (c.title LIKE ? OR c.description LIKE ?) 
+            AND c.visibility = 'public'
+            AND EXISTS (
+                SELECT 1 FROM cards ca WHERE ca.card_set_id = c.id
+            )
         LIMIT ? OFFSET ?;
     `;
 

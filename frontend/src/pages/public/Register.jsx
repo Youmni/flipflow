@@ -4,6 +4,7 @@ import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useSnackbar } from "notistack";
 import { FiLoader } from "react-icons/fi";
+import { Helmet } from "react-helmet-async";
 
 const Register = () => {
   const [registerForm, setRegisterForm] = useState({
@@ -52,6 +53,10 @@ const Register = () => {
   };
 
   return (
+    <>
+    <Helmet>
+      <title>FlipFlow - Registration</title>
+    </Helmet>
     <div className="flex min-h-screen bg-gray-100 justify-center items-center">
       <form
         onSubmit={handleClick}
@@ -157,6 +162,7 @@ const Register = () => {
         <p className="text-right">Already registrated? <span onClick={handleClickLogin} className="text-green-600 underline cursor-pointer hover:text-green-400">login</span></p>
       </form>
     </div>
+    </>
   );
 };
 

@@ -6,6 +6,7 @@ import { AuthContext } from "../../components/AuthProvider";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useSnackbar } from "notistack";
 import { FiLoader } from "react-icons/fi";
+import { Helmet } from "react-helmet-async";
 
 const Login = () => {
   const { setAccessToken } = useContext(AuthContext);
@@ -100,6 +101,10 @@ const Login = () => {
   };
 
   return (
+  <>
+    <Helmet>
+      <title>FlipFlow - Login</title>
+    </Helmet>
     <div className="flex w-full h-screen bg-gray-50 justify-center items-center">
       <form
         action=""
@@ -170,6 +175,7 @@ const Login = () => {
         </div>
       </form>
     </div>
+  </>
   );
 };
 
